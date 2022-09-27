@@ -19,7 +19,7 @@ enum CliCommand {
     /// Sets up environment by cloning an existing Git repository.
     Decode {
         /// The JWT to decode.
-        token: String,
+        token: Option<String>,
         /// Public key to use to verify the JWT signature.
         #[clap(long)]
         public_key: Option<String>,
@@ -31,7 +31,7 @@ impl Cli {
         if let Some(command) = &self.command {
             match command {
                 CliCommand::Decode { token, public_key } => {
-                    command::decode::run(token, public_key.as_deref())
+                    command::decode::run(token.as_deref(), public_key.as_deref())
                 }
             }
         } else {

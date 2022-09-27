@@ -1,3 +1,4 @@
+use ansi_term::Color;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -8,4 +9,9 @@ pub enum JwtError {
     PartDecodeFailed(#[from] base64::DecodeError),
     #[error("failed to parse part as JSON: {0}")]
     JsonParseFailed(#[from] serde_json::Error),
+}
+
+pub fn display_message_and_exit(message: &str) {
+    eprintln!("{}: {}", Color::Red.paint("error"), message);
+    std::process::exit(1);
 }

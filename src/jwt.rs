@@ -2,19 +2,39 @@ use std::str::FromStr;
 
 use crate::error::JwtError;
 
+#[derive(Debug)]
 pub struct Jwt {
-    header: serde_json::Value,
-    payload: serde_json::Value,
-    signature: Vec<u8>,
+    header: String,
+    header_json: serde_json::Value,
+    payload: String,
+    payload_json: serde_json::Value,
+    signature: String,
+    signature_bytes: Vec<u8>,
 }
 
 impl Jwt {
-    pub fn header(&self) -> String {
-        serde_json::to_string_pretty(&self.header).unwrap()
+    pub fn header(&self) -> &str {
+        &self.header
     }
 
-    pub fn payload(&self) -> String {
-        serde_json::to_string_pretty(&self.payload).unwrap()
+    pub fn header_json(&self) -> String {
+        serde_json::to_string_pretty(&self.header_json).unwrap()
+    }
+
+    pub fn payload(&self) -> &str {
+        &self.payload
+    }
+
+    pub fn payload_json(&self) -> String {
+        serde_json::to_string_pretty(&self.payload_json).unwrap()
+    }
+
+    pub fn signature(&self) -> &str {
+        &self.signature
+    }
+
+    pub fn signature_bytes(&self) -> &[u8] {
+        &self.signature_bytes
     }
 }
 
@@ -22,22 +42,25 @@ impl FromStr for Jwt {
     type Err = JwtError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let parts: Vec<_> = s.split(".").collect();
+        let parts: Vec<_> = s.split('.').collect();
         if parts.len() != 3 || parts.iter().any(|s| s.is_empty()) {
             return Err(JwtError::InvalidTokenFormat);
         }
 
-        let header_buf = base64::decode_config(parts[0], base64::URL_SAFE_NO_PAD)?;
-        let payload_buf = base64::decode_config(parts[1], base64::URL_SAFE_NO_PAD)?;
-        let signature = base64::decode_config(parts[2], base64::URL_SAFE_NO_PAD)?;
+        let header_bytes = base64::decode_config(parts[0], base64::URL_SAFE_NO_PAD)?;
+        let payload_bytes = base64::decode_config(parts[1], base64::URL_SAFE_NO_PAD)?;
+        let signature_bytes = base64::decode_config(parts[2], base64::URL_SAFE_NO_PAD)?;
 
-        let header = serde_json::from_slice(&header_buf)?;
-        let payload = serde_json::from_slice(&payload_buf)?;
+        let header_json = serde_json::from_slice(&header_bytes)?;
+        let payload_json = serde_json::from_slice(&payload_bytes)?;
 
         Ok(Self {
-            header,
-            payload,
-            signature,
+            header: parts[0].to_string(),
+            header_json,
+            payload: parts[1].to_string(),
+            payload_json,
+            signature: parts[2].to_string(),
+            signature_bytes,
         })
     }
 }
