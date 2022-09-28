@@ -123,6 +123,6 @@ mod test {
             base64::URL_SAFE_NO_PAD,
         )
             .unwrap();
-        assert_eq!(signature, jwt.signature);
+        assert_eq!(signature, jwt.signature_bytes);
     }
 }
