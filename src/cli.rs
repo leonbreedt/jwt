@@ -21,8 +21,8 @@ enum CliCommand {
         /// The JWT to decode.
         token: Option<String>,
         /// Public key to use to verify the JWT signature.
-        #[clap(long)]
-        public_key: Option<String>,
+        #[clap(long, env("SIGNATURE_PUBLIC_KEY"))]
+        signature_public_key: Option<String>,
     },
 }
 
@@ -30,8 +30,8 @@ impl Cli {
     pub fn run(&self) {
         if let Some(command) = &self.command {
             match command {
-                CliCommand::Decode { token, public_key } => {
-                    command::decode::run(token.as_deref(), public_key.as_deref())
+                CliCommand::Decode { token, signature_public_key } => {
+                    command::decode::run(token.as_deref(), signature_public_key.as_deref())
                 }
             }
         } else {

@@ -4,6 +4,7 @@ mod cli;
 mod command;
 mod error;
 mod jwt;
+mod jwks;
 
 use cli::Cli;
 

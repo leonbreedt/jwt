@@ -36,6 +36,10 @@ impl Jwt {
     pub fn signature_bytes(&self) -> &[u8] {
         &self.signature_bytes
     }
+
+    pub fn claim(&self, name: &str) -> Option<serde_json::Value> {
+        self.payload_json.get(name).cloned()
+    }
 }
 
 impl FromStr for Jwt {
@@ -47,9 +51,9 @@ impl FromStr for Jwt {
             return Err(JwtError::InvalidTokenFormat);
         }
 
-        let header_bytes = base64::decode_config(parts[0], base64::URL_SAFE_NO_PAD)?;
-        let payload_bytes = base64::decode_config(parts[1], base64::URL_SAFE_NO_PAD)?;
-        let signature_bytes = base64::decode_config(parts[2], base64::URL_SAFE_NO_PAD)?;
+        let header_bytes = base64::decode_config(parts[0], base64::URL_SAFE_NO_PAD.decode_allow_trailing_bits(true))?;
+        let payload_bytes = base64::decode_config(parts[1], base64::URL_SAFE_NO_PAD.decode_allow_trailing_bits(true))?;
+        let signature_bytes = base64::decode_config(parts[2], base64::URL_SAFE_NO_PAD.decode_allow_trailing_bits(true))?;
 
         let header_json = serde_json::from_slice(&header_bytes)?;
         let payload_json = serde_json::from_slice(&payload_bytes)?;
@@ -118,7 +122,7 @@ mod test {
             "SQi7MOuvmybQZg_vU-VFG_EK0_U4DijRn-_Fmlw7qUo",
             base64::URL_SAFE_NO_PAD,
         )
-        .unwrap();
+            .unwrap();
         assert_eq!(signature, jwt.signature);
     }
 }
